@@ -1,0 +1,498 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day Book Expense Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx-js-style/1.2.0/xlsx.bundle.js"></script>
+<script>
+if (typeof XLSX === 'undefined') {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"><\/script>');
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --paper:#f4efe2; --card:#fffdf7; --ink:#23302a; --muted:#7c8579;
+    --line:#e1dac7; --accent:#1f5f4f; --accent-d:#163f35;
+    --amber:#f6e7a8; --amber-line:#d8c067; --mint:#cfebd9; --mint-line:#86c4a0;
+    --red:#b4452e; --shadow:0 2px 4px rgba(40,50,40,.06),0 8px 24px rgba(40,50,40,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(circle at 12% 8%, #faf6ec 0%, transparent 40%),
+      radial-gradient(circle at 90% 0%, #f0ead9 0%, transparent 45%),
+      var(--paper);
+    color:var(--ink); font-family:'IBM Plex Sans',sans-serif; padding-bottom:120px;}
+  .num{font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;}
+  h1,h2,h3{font-family:'Fraunces',serif; margin:0; font-weight:600;}
+
+  /* ---- top banner ---- */
+  header.banner{background:linear-gradient(135deg,var(--accent),var(--accent-d));
+    color:#f4efe2; padding:22px 24px 26px; text-align:center; position:relative;
+    box-shadow:var(--shadow); border-bottom:3px solid #c9a84a;}
+  header.banner .co{font-size:30px; letter-spacing:.5px; line-height:1.1;}
+  header.banner input.co-in,header.banner input.addr-in{
+    background:transparent; border:none; color:#fff; text-align:center; width:100%;
+    font-family:inherit;}
+  header.banner input.co-in{font-family:'Fraunces',serif; font-size:30px; font-weight:600;}
+  header.banner input.addr-in{font-size:14px; color:#dfeee6; margin-top:6px; letter-spacing:.3px;}
+  header.banner .ttl{margin-top:14px; font-size:15px; font-weight:600; letter-spacing:.4px;
+    display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap;}
+  header.banner .ttl input{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3);
+    color:#fff; border-radius:8px; padding:5px 8px; font-family:'IBM Plex Sans'; font-size:14px;}
+  .wrap{max-width:1100px; margin:0 auto; padding:0 18px;}
+
+  /* ---- summary cards ---- */
+  .cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:-22px auto 8px;
+    max-width:1100px; padding:0 18px; position:relative; z-index:2;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:16px 18px; box-shadow:var(--shadow);}
+  .card .lbl{font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); font-weight:600;}
+  .card .val{font-size:26px; font-weight:600; margin-top:6px;}
+  .card.recv .val{color:var(--accent);}
+  .card.exp .val{color:var(--red);}
+  .card.close{background:linear-gradient(135deg,#eaf6ee,#dcefe3); border-color:var(--mint-line);}
+  .card.close .val{color:var(--accent-d);}
+  .card.split .row{display:flex; justify-content:space-between; font-size:13px; margin-top:5px;}
+  .card.split .row span:last-child{font-family:'IBM Plex Mono'; font-weight:600;}
+
+  section.panel{background:var(--card); border:1px solid var(--line); border-radius:18px;
+    box-shadow:var(--shadow); margin:18px 0; overflow:hidden;}
+  .phead{display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 18px; border-bottom:1px solid var(--line); background:#fbf7ee;}
+  .phead h2{font-size:19px; display:flex; align-items:center; gap:9px;}
+  .phead .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);}
+  .pbody{padding:8px 14px 16px;}
+
+  /* ---- tables ---- */
+  table{width:100%; border-collapse:collapse;}
+  th{font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--muted);
+    text-align:left; padding:8px 8px; font-weight:600;}
+  td{padding:4px 6px; vertical-align:middle;}
+  input.cell,select.cell,textarea.cell{width:100%; border:1px solid transparent; background:#fbf8f0;
+    border-radius:8px; padding:8px 9px; font-family:inherit; font-size:14px; color:var(--ink);
+    transition:border-color .12s,background .12s;}
+  textarea.cell{resize:vertical; min-height:38px; line-height:1.35;}
+  input.cell:focus,select.cell:focus,textarea.cell:focus{outline:none; border-color:var(--accent);
+    background:#fff;}
+  input.cell.amt{text-align:right; font-family:'IBM Plex Mono'; font-weight:600;}
+  td.act{width:34px; text-align:center;}
+
+  .iconbtn{border:none; background:transparent; cursor:pointer; color:var(--muted);
+    font-size:16px; padding:6px; border-radius:8px; line-height:1;}
+  .iconbtn:hover{background:#f0e9d8; color:var(--red);}
+
+  .daycard{border:1px solid var(--line); border-radius:14px; margin:12px 0; overflow:hidden;
+    background:#fffefa;}
+  .dayhead{display:flex; align-items:center; gap:10px; padding:10px 12px; background:#f6f1e4;
+    border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .dayhead .dlabel{font-family:'Fraunces'; font-weight:600; font-size:15px;}
+  .dayhead input[type=date]{border:1px solid var(--line); border-radius:8px; padding:6px 8px;
+    font-family:inherit; background:#fff;}
+  .daytotal{margin-left:auto; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted);}
+  .daytotal b{font-family:'IBM Plex Mono'; font-size:17px; color:var(--ink);
+    background:var(--amber); border:1px solid var(--amber-line); padding:3px 10px; border-radius:8px;}
+
+  .btn{border:none; border-radius:10px; padding:9px 15px; font-family:inherit; font-size:13.5px;
+    font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+    transition:transform .08s,filter .12s;}
+  .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:#f2ecdd; color:var(--accent-d); border:1px dashed var(--accent);}
+  .btn.ghost:hover{background:#eae1cc;}
+  .btn.solid{background:var(--accent); color:#fff;}
+  .btn.solid:hover{filter:brightness(1.07);}
+  .addrow{margin:6px 4px 2px;}
+
+  /* ---- bottom toolbar ---- */
+  .toolbar{position:fixed; bottom:0; left:0; right:0; background:rgba(255,253,247,.92);
+    backdrop-filter:blur(8px); border-top:1px solid var(--line); padding:12px 18px;
+    display:flex; gap:10px; justify-content:center; flex-wrap:wrap; z-index:20;
+    box-shadow:0 -6px 20px rgba(40,50,40,.06);}
+  .toolbar .btn.dl{background:#c9a84a; color:#2a230d;}
+  .toolbar .btn.dl:hover{filter:brightness(1.06);}
+  .toolbar .btn.line{background:#fff; border:1px solid var(--line); color:var(--ink);}
+  .toolbar .btn.line:hover{background:#f6f1e4;}
+
+  .hint{font-size:12.5px; color:var(--muted); padding:2px 18px 0; text-align:center;}
+  .saveflag{font-size:12px; color:var(--accent); text-align:center; padding:4px; min-height:18px;}
+  @media(max-width:760px){
+    .cards{grid-template-columns:repeat(2,1fr);}
+    header.banner .co,header.banner input.co-in{font-size:23px;}
+    th.hide,td.hide{display:none;}
+  }
+  @media print{
+    .toolbar,.iconbtn,.addrow,.phead .btn{display:none!important;}
+    body{background:#fff; padding:0;}
+  }
+</style>
+
+<header class="banner">
+  <input class="co-in" id="coName" value="Vishal Electricals" placeholder="Company Name">
+  <input class="addr-in" id="coAddr" value="B-4, Hans Plaza, Ambedkar Road, Ghaziabad - 201001" placeholder="Address">
+  <div class="ttl">
+    <span>Day Book Expense Tracking Sheet&nbsp;&mdash;&nbsp;From</span>
+    <input type="date" id="fromDate">
+    <span>To</span>
+    <input type="date" id="toDate">
+  </div>
+</header>
+
+<div class="cards">
+  <div class="card recv"><div class="lbl">Total Receiving (A)</div><div class="val num" id="cReceiving">0</div></div>
+  <div class="card exp"><div class="lbl">Total Expense (B)</div><div class="val num" id="cExpense">0</div></div>
+  <div class="card close"><div class="lbl">Closing Balance (A − B)</div><div class="val num" id="cClose">0</div></div>
+  <div class="card split">
+    <div class="lbl">By Method</div>
+    <div class="row"><span>Cash</span><span class="num" id="cCash">0</span></div>
+    <div class="row"><span>Online</span><span class="num" id="cOnline">0</span></div>
+    <div class="row"><span>Other</span><span class="num" id="cOther">0</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="panel">
+    <div class="phead">
+      <h2><span class="dot"></span>Receiving / Money In</h2>
+      <button class="btn ghost" onclick="addReceiving()">+ Add receiving</button>
+    </div>
+    <div class="pbody">
+      <table><thead><tr>
+        <th>Description (e.g. Opening balance, Received from…)</th>
+        <th style="width:150px">Amount (₹)</th><th class="act"></th>
+      </tr></thead><tbody id="recvBody"></tbody></table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="phead">
+      <h2><span class="dot"></span>Daily Expenses</h2>
+      <button class="btn solid" onclick="addDay()">+ Add a day</button>
+    </div>
+    <div class="pbody" id="daysWrap"></div>
+  </section>
+
+  <section class="panel">
+    <div class="phead">
+      <h2><span class="dot"></span>Requirements (optional)</h2>
+      <button class="btn ghost" onclick="addReq()">+ Add line</button>
+    </div>
+    <div class="pbody">
+      <table><thead><tr><th>Requirement</th><th style="width:150px">Amount (₹)</th><th class="act"></th></tr></thead>
+      <tbody id="reqBody"></tbody></table>
+    </div>
+  </section>
+
+  <div class="saveflag" id="saveFlag"></div>
+</div>
+
+<div class="toolbar">
+  <button class="btn dl" onclick="downloadExcel()">⬇ Download Excel</button>
+  <button class="btn line" onclick="newBookCarry()">↻ New book (carry balance)</button>
+  <button class="btn line" onclick="backupJSON()">💾 Backup</button>
+  <button class="btn line" onclick="document.getElementById('restoreFile').click()">📂 Restore</button>
+  <button class="btn line" onclick="window.print()">🖨 Print</button>
+  <button class="btn line" onclick="clearAll()">🗑 Clear</button>
+  <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreJSON(event)">
+</div>
+<div class="hint" style="position:fixed;bottom:4px;left:0;right:0;">Data auto-saves in this browser. Use Backup for a portable copy you can keep or move to another device.</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const METHODS = ['Cash','Online','Cheque','UPI','Other'];
+const KEY = 'vishal_daybook_v1';
+let state = null;
+
+function blankState(){
+  const today = new Date().toISOString().slice(0,10);
+  return {
+    company:'Vishal Electricals',
+    address:'B-4, Hans Plaza, Ambedkar Road, Ghaziabad - 201001',
+    fromDate: today, toDate: today,
+    receiving:[{label:'Opening balance', amount:''}],
+    days:[{date: today, entries:[{method:'Cash', to:'', description:'', amount:'', remarks:''}]}],
+    requirements:[]
+  };
+}
+
+/* ---------- date helpers ---------- */
+function ddmmyyyy(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}.${m}.${y}`; }
+
+/* ---------- render ---------- */
+function render(){
+  $('coName').value = state.company;
+  $('coAddr').value = state.address;
+  $('fromDate').value = state.fromDate;
+  $('toDate').value = state.toDate;
+
+  // receiving
+  const rb = $('recvBody'); rb.innerHTML='';
+  state.receiving.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="cell" value="${esc(it.label)}" oninput="state.receiving[${i}].label=this.value;save()"></td>
+      <td><input class="cell amt num" value="${esc(it.amount)}" inputmode="decimal" oninput="state.receiving[${i}].amount=this.value;recalc();save()"></td>
+      <td class="act"><button class="iconbtn" title="Remove" onclick="state.receiving.splice(${i},1);render();recalc();save()">✕</button></td>`;
+    rb.appendChild(tr);
+  });
+
+  // days
+  const dw=$('daysWrap'); dw.innerHTML='';
+  state.days.forEach((day,di)=>{
+    const card=document.createElement('div'); card.className='daycard';
+    let rowsHtml='';
+    day.entries.forEach((e,ei)=>{
+      rowsHtml+=`<tr>
+        <td style="width:120px"><select class="cell" onchange="state.days[${di}].entries[${ei}].method=this.value;save()">
+          ${METHODS.map(m=>`<option ${m===e.method?'selected':''}>${m}</option>`).join('')}</select></td>
+        <td style="width:140px"><input class="cell" value="${esc(e.to)}" placeholder="Paid To" oninput="state.days[${di}].entries[${ei}].to=this.value;save()"></td>
+        <td><textarea class="cell" placeholder="Description" oninput="state.days[${di}].entries[${ei}].description=this.value;save()">${esc(e.description)}</textarea></td>
+        <td style="width:110px"><input class="cell amt num" value="${esc(e.amount)}" inputmode="decimal" placeholder="0" oninput="state.days[${di}].entries[${ei}].amount=this.value;recalc();save()"></td>
+        <td class="hide" style="width:130px"><input class="cell" value="${esc(e.remarks)}" placeholder="Remarks" oninput="state.days[${di}].entries[${ei}].remarks=this.value;save()"></td>
+        <td class="act"><button class="iconbtn" onclick="removeEntry(${di},${ei})">✕</button></td>
+      </tr>`;
+    });
+    card.innerHTML=`
+      <div class="dayhead">
+        <span class="dlabel">📅</span>
+        <input type="date" value="${day.date}" onchange="state.days[${di}].date=this.value;recalc();save()">
+        <div class="daytotal">Day total <b class="num" id="dt${di}">0</b></div>
+        <button class="iconbtn" title="Remove day" onclick="state.days.splice(${di},1);render();recalc();save()" style="margin-left:6px">🗑</button>
+      </div>
+      <table><thead><tr><th>Method</th><th>Paid To</th><th>Description</th><th>Amount</th><th class="hide">Remarks</th><th class="act"></th></tr></thead>
+      <tbody>${rowsHtml}</tbody></table>
+      <div class="addrow"><button class="btn ghost" onclick="addEntry(${di})">+ Add entry</button></div>`;
+    dw.appendChild(card);
+  });
+
+  // requirements
+  const qb=$('reqBody'); qb.innerHTML='';
+  state.requirements.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="cell" value="${esc(it.label)}" oninput="state.requirements[${i}].label=this.value;save()"></td>
+      <td><input class="cell amt num" value="${esc(it.amount)}" inputmode="decimal" oninput="state.requirements[${i}].amount=this.value;save()"></td>
+      <td class="act"><button class="iconbtn" onclick="state.requirements.splice(${i},1);render();save()">✕</button></td>`;
+    qb.appendChild(tr);
+  });
+
+  recalc();
+}
+function esc(v){ return (v==null?'':String(v)).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+/* ---------- mutations ---------- */
+function addReceiving(){ state.receiving.push({label:'',amount:''}); render(); save(); }
+function addReq(){ state.requirements.push({label:'',amount:''}); render(); save(); }
+function addDay(){
+  const last = state.days[state.days.length-1];
+  const d = last ? last.date : new Date().toISOString().slice(0,10);
+  state.days.push({date:d, entries:[{method:'Cash',to:'',description:'',amount:'',remarks:''}]});
+  render(); save();
+}
+function addEntry(di){ state.days[di].entries.push({method:'Cash',to:'',description:'',amount:'',remarks:''}); render(); save(); }
+function removeEntry(di,ei){
+  state.days[di].entries.splice(ei,1);
+  if(state.days[di].entries.length===0) state.days[di].entries.push({method:'Cash',to:'',description:'',amount:'',remarks:''});
+  render(); recalc(); save();
+}
+
+/* ---------- calculations ---------- */
+const num = v => { const n=parseFloat(v); return isNaN(n)?0:n; };
+const fmt = n => n.toLocaleString('en-IN',{maximumFractionDigits:2});
+function recalc(){
+  const A = state.receiving.reduce((s,r)=>s+num(r.amount),0);
+  let B=0, cash=0, online=0, other=0;
+  state.days.forEach((day,di)=>{
+    const t = day.entries.reduce((s,e)=>s+num(e.amount),0);
+    B+=t;
+    const el=$('dt'+di); if(el) el.textContent=fmt(t);
+    day.entries.forEach(e=>{
+      const a=num(e.amount);
+      if(e.method==='Cash') cash+=a;
+      else if(e.method==='Online'||e.method==='UPI') online+=a;
+      else other+=a;
+    });
+  });
+  $('cReceiving').textContent='₹ '+fmt(A);
+  $('cExpense').textContent='₹ '+fmt(B);
+  $('cClose').textContent='₹ '+fmt(A-B);
+  $('cCash').textContent=fmt(cash);
+  $('cOnline').textContent=fmt(online);
+  $('cOther').textContent=fmt(other);
+}
+
+/* ---------- persistence (graceful if storage blocked) ---------- */
+let saveTimer=null;
+function save(){
+  syncHeader();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); flag('Saved ✓'); }
+    catch(e){ flag('In-memory only (open the downloaded file to enable auto-save)'); }
+  },250);
+}
+function flag(t){ const f=$('saveFlag'); f.textContent=t; clearTimeout(f._t); f._t=setTimeout(()=>f.textContent='',1400); }
+function syncHeader(){
+  state.company=$('coName').value; state.address=$('coAddr').value;
+  state.fromDate=$('fromDate').value; state.toDate=$('toDate').value;
+}
+function load(){
+  try{ const s=localStorage.getItem(KEY); if(s) return JSON.parse(s); }catch(e){}
+  return null;
+}
+
+/* header inputs */
+['coName','coAddr','fromDate','toDate'].forEach(id=>{
+  document.addEventListener('input',e=>{ if(e.target.id===id) save(); });
+});
+
+/* ---------- backup / restore ---------- */
+function backupJSON(){
+  syncHeader();
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`daybook_backup_${state.fromDate||'data'}.json`; a.click();
+}
+function restoreJSON(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ state=JSON.parse(r.result); render(); save(); flag('Restored ✓'); }
+    catch(e){ alert('Could not read that backup file.'); } };
+  r.readAsText(f); ev.target.value='';
+}
+function clearAll(){
+  if(confirm('Clear everything and start a fresh blank day book?')){ state=blankState(); render(); save(); }
+}
+function newBookCarry(){
+  syncHeader();
+  const A=state.receiving.reduce((s,r)=>s+num(r.amount),0);
+  const B=state.days.reduce((s,d)=>s+d.entries.reduce((x,e)=>x+num(e.amount),0),0);
+  const closing=A-B;
+  if(!confirm(`Start a NEW book?\nClosing balance ₹${fmt(closing)} will become the new Opening balance.\n(Backup the current one first if needed.)`)) return;
+  const today=new Date().toISOString().slice(0,10);
+  state={ company:state.company, address:state.address, fromDate:today, toDate:today,
+    receiving:[{label:`Opening balance on dtd:${ddmmyyyy(today)}`, amount:closing}],
+    days:[{date:today, entries:[{method:'Cash',to:'',description:'',amount:'',remarks:''}]}],
+    requirements:[] };
+  render(); save(); flag('New book started');
+}
+
+/* ====================  EXCEL EXPORT (matches company format)  ==================== */
+function downloadExcel(){
+  syncHeader();
+  if(typeof XLSX==='undefined'){ alert('Excel library still loading — please wait a moment and try again.'); return; }
+  const book={
+    companyName:state.company, address:state.address,
+    fromDate:ddmmyyyy(state.fromDate), toDate:ddmmyyyy(state.toDate),
+    receiving:state.receiving.map(r=>({label:r.label,amount:r.amount})),
+    days:state.days.map(d=>({date:ddmmyyyy(d.date),entries:d.entries})),
+    requirements:state.requirements
+  };
+  const wb=buildWorkbook(book);
+  XLSX.writeFile(wb, `Day_Book_${book.fromDate}_to_${book.toDate}.xlsx`);
+}
+
+function buildWorkbook(book){
+  const n=v=>{const x=parseFloat(v);return isNaN(x)?0:x;};
+  const COLS=7, FONT='Arial';
+  const rows=[], merges=[], styleMap={};
+  const border={top:{style:'thin',color:{rgb:'FFBFBFBF'}},bottom:{style:'thin',color:{rgb:'FFBFBFBF'}},
+    left:{style:'thin',color:{rgb:'FFBFBFBF'}},right:{style:'thin',color:{rgb:'FFBFBFBF'}}};
+  const S=(r,c,st)=>styleMap[r+','+c]=st;
+  let r=0; const push=a=>{rows.push(a);return r++;};
+
+  const tR=push([book.companyName||'','','','','','','']);
+  merges.push({s:{r:tR,c:0},e:{r:tR,c:COLS-1}});
+  S(tR,0,{font:{name:FONT,sz:18,bold:true},alignment:{horizontal:'center',vertical:'center'}});
+  const aR=push([book.address||'','','','','','','']);
+  merges.push({s:{r:aR,c:0},e:{r:aR,c:COLS-1}});
+  S(aR,0,{font:{name:FONT,sz:12},alignment:{horizontal:'center',vertical:'center'}});
+  const dR=push([`Day Book Expense Tracking Sheet (${book.fromDate||''} TO ${book.toDate||''})`,'','','','','','']);
+  merges.push({s:{r:dR,c:0},e:{r:dR,c:COLS-1}});
+  S(dR,0,{font:{name:FONT,sz:14,bold:true},alignment:{horizontal:'center',vertical:'center'}});
+
+  const heads=['Date','Payment\nMethod','Payment\nTo','Description','Amount','Total\n(Per Day)','Remarks\n(If Any)'];
+  const hR=push(heads);
+  for(let c=0;c<COLS;c++) S(hR,c,{font:{name:FONT,sz:12,bold:true,color:{rgb:'FFFFFFFF'}},
+    alignment:{horizontal:'center',vertical:'center',wrapText:true},fill:{fgColor:{rgb:'FF1F5F4F'}},border});
+
+  const firstRecvExcel=hR+2;
+  (book.receiving||[]).forEach(it=>{
+    const rr=push(['','','',it.label||'',n(it.amount),'','']);
+    S(rr,3,{font:{name:FONT,sz:11,bold:true},alignment:{horizontal:'left'},border});
+    S(rr,4,{font:{name:FONT,sz:11,bold:true},alignment:{horizontal:'center'},numFmt:'#,##0',border});
+  });
+  const aRow=push(['','','','Total Receiving Till Date (A)',{f:`SUM(E${firstRecvExcel}:E${r})`},'','']);
+  S(aRow,3,{font:{name:FONT,sz:12,bold:true},alignment:{horizontal:'left'},border});
+  S(aRow,4,{font:{name:FONT,sz:12,bold:true},alignment:{horizontal:'center'},fill:{fgColor:{rgb:'FFFFF2A8'}},numFmt:'#,##0',border});
+  push(['','','','','','','']);
+
+  const perDay=[];
+  (book.days||[]).forEach(day=>{
+    const ents=(day.entries||[]).filter(e=>e.method||e.to||e.description||e.amount);
+    if(!ents.length) return;
+    const start=r+1;
+    ents.forEach((e,i)=>{
+      const rr=push([i===0?(day.date||''):'',e.method||'',e.to||'',e.description||'',n(e.amount),'',e.remarks||'']);
+      S(rr,0,{font:{name:FONT,sz:11},alignment:{horizontal:'center',vertical:'center'},border});
+      S(rr,1,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},border});
+      S(rr,2,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},border});
+      S(rr,3,{font:{name:FONT,sz:11},alignment:{horizontal:'left',wrapText:true},border});
+      S(rr,4,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},numFmt:'#,##0',border});
+      S(rr,5,{border});
+      S(rr,6,{font:{name:FONT,sz:11},alignment:{horizontal:'left',wrapText:true},border});
+    });
+    const end=r;
+    const tRow=push(['','','','','',{f:`SUM(E${start}:E${end})`},'']);
+    perDay.push('F'+(tRow+1));
+    S(tRow,5,{font:{name:FONT,sz:12,bold:true},alignment:{horizontal:'center'},fill:{fgColor:{rgb:'FFFFF2A8'}},numFmt:'#,##0',border});
+    push(['','','','','','','']);
+  });
+
+  push(['','','','','','','']);
+  const bExpr=perDay.length?perDay.join('+'):'0';
+  const bRow=push(['Total Expense Till Date (B)','','','',{f:bExpr},'','']);
+  merges.push({s:{r:bRow,c:0},e:{r:bRow,c:3}});
+  S(bRow,0,{font:{name:FONT,sz:12,bold:true},alignment:{horizontal:'left'}});
+  S(bRow,4,{font:{name:FONT,sz:12,bold:true},alignment:{horizontal:'center'},fill:{fgColor:{rgb:'FFFFF2A8'}},numFmt:'#,##0',border});
+  const aExcel=aRow+1,bExcel=bRow+1;
+
+  const r1=push(['Total Receiving Till Date (A)','','','',{f:'E'+aExcel},'','']);
+  merges.push({s:{r:r1,c:0},e:{r:r1,c:3}}); S(r1,0,{font:{name:FONT,sz:11,bold:true}});
+  S(r1,4,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},numFmt:'#,##0'});
+  const r2=push(['Total Expense Till Date (B)','','','',{f:'E'+bExcel},'','']);
+  merges.push({s:{r:r2,c:0},e:{r:r2,c:3}}); S(r2,0,{font:{name:FONT,sz:11,bold:true}});
+  S(r2,4,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},numFmt:'#,##0'});
+  const r3=push(['Closing Balance (A-B)','','','',{f:`E${aExcel}-E${bExcel}`},'','']);
+  merges.push({s:{r:r3,c:0},e:{r:r3,c:3}}); S(r3,0,{font:{name:FONT,sz:13,bold:true}});
+  S(r3,4,{font:{name:FONT,sz:13,bold:true},alignment:{horizontal:'center'},fill:{fgColor:{rgb:'FFCDEBD9'}},numFmt:'#,##0'});
+
+  if((book.requirements||[]).filter(q=>q.label||q.amount).length){
+    push(['','','','','','','']);
+    const qh=push(['Requirements:','','','','','','']);
+    merges.push({s:{r:qh,c:0},e:{r:qh,c:3}}); S(qh,0,{font:{name:FONT,sz:12,bold:true}});
+    book.requirements.filter(q=>q.label||q.amount).forEach(q=>{
+      const rr=push([q.label||'','','','',n(q.amount),'','']);
+      merges.push({s:{r:rr,c:0},e:{r:rr,c:3}});
+      S(rr,0,{font:{name:FONT,sz:11}}); S(rr,4,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},numFmt:'#,##0'});
+    });
+  }
+
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!merges']=merges;
+  ws['!cols']=[{wch:13},{wch:16},{wch:17},{wch:34},{wch:13},{wch:16},{wch:20}];
+  ws['!rows']=[]; ws['!rows'][hR]={hpt:34};
+  Object.keys(styleMap).forEach(k=>{
+    const [rr,cc]=k.split(',').map(Number);
+    const ad=XLSX.utils.encode_cell({r:rr,c:cc});
+    if(!ws[ad]) ws[ad]={t:'s',v:''};
+    ws[ad].s=styleMap[k];
+  });
+  const wb=XLSX.utils.book_new();
+  let name=(book.fromDate||'Day Book').replace(/[\\/?*\[\]:]/g,'.').slice(0,31);
+  XLSX.utils.book_append_sheet(wb,ws,name);
+  return wb;
+}
+
+/* ---------- boot ---------- */
+state = load() || blankState();
+render();
+</script>
