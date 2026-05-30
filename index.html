@@ -194,7 +194,7 @@ const METHODS=['Cash','Online','Cheque','UPI','Other'];
 const CATEGORIES=['Petrol Expense','Print and Stationary','Tea and Milk','Staff Welfare',
   'Vehicle Repair and Maintenance','Housekeeping','Birthday Celebration','Anniversary Celebration',
   'Donation','Miscellaneous'];
-const DEFAULT_EMAILS={e1:'accounts.vishalelectricals@yahoo.com',e2:'accounts2.ve@yahoo.com',e3:'operations3.ve@yahoo.com',endpoint:''};
+const DEFAULT_EMAILS={e1:'accounts.vishalelectricals@yahoo.com',e2:'accounts2.ve@yahoo.com',e3:'operations3.ve@yahoo.com',endpoint:'https://script.google.com/macros/s/AKfycbzBo9EC8j-ogOvzh14rI5ROoJrtBwyCSc_Fi8ICotA5SMMmH0z6aUmd01OMBUcg0zzJ/exec'};
 let state=null;
 
 function blankEntry(){return {method:'Cash',category:'',to:'',description:'',amount:'',remarks:''};}
@@ -423,6 +423,7 @@ function buildWorkbook(book){
 state=load()||blankState();
 if(!state.emailConfig)state.emailConfig=Object.assign({},DEFAULT_EMAILS);
 if(!state.emailConfig.e1&&!state.emailConfig.e2&&!state.emailConfig.e3)state.emailConfig=Object.assign({endpoint:state.emailConfig.endpoint||''},DEFAULT_EMAILS);
+if(!state.emailConfig.endpoint&&DEFAULT_EMAILS.endpoint)state.emailConfig.endpoint=DEFAULT_EMAILS.endpoint;
 state.days.forEach(d=>d.entries.forEach(e=>{if(e.category===undefined)e.category='';}));
 render();
 </script>
