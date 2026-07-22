@@ -20,11 +20,17 @@ if (typeof XLSX === 'undefined') {
     color:var(--ink);font-family:'IBM Plex Sans',sans-serif;padding-bottom:128px;}
   .num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
   h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:600;}
-  header.banner{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#f4efe2;padding:22px 24px 26px;text-align:center;position:relative;box-shadow:var(--shadow);border-bottom:3px solid #c9a84a;}
-  header.banner input.co-in,header.banner input.addr-in{background:transparent;border:none;color:#fff;text-align:center;width:100%;font-family:inherit;}
-  header.banner input.co-in{font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
-  header.banner input.addr-in{font-size:14px;color:#dfeee6;margin-top:6px;letter-spacing:.3px;}
-  header.banner .ttl{margin-top:14px;font-size:15px;font-weight:600;letter-spacing:.4px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  header.banner{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#f4efe2;padding:20px 24px 24px;text-align:center;position:relative;box-shadow:var(--shadow);border-bottom:3px solid #c9a84a;}
+  /* --- brand row: logo + company text --- */
+  .brand{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;max-width:900px;margin:0 auto;}
+  .brand .logoBox{background:#fff;border-radius:12px;padding:8px 14px;box-shadow:0 3px 10px rgba(0,0,0,.18);flex:0 0 auto;line-height:0;}
+  .brand .logoBox img{height:54px;width:auto;display:block;}
+  .brand .btxt{flex:1 1 260px;min-width:230px;max-width:520px;text-align:left;}
+  header.banner input.co-in,header.banner input.addr-in{background:transparent;border:none;color:#fff;text-align:left;width:100%;font-family:inherit;padding:0;}
+  header.banner input.co-in{font-family:'Fraunces',serif;font-size:28px;font-weight:600;letter-spacing:.3px;}
+  header.banner input.addr-in{font-size:13.5px;color:#dfeee6;margin-top:5px;letter-spacing:.3px;}
+  header.banner input.co-in:focus,header.banner input.addr-in:focus{outline:none;background:rgba(255,255,255,.10);border-radius:6px;}
+  header.banner .ttl{margin-top:16px;font-size:15px;font-weight:600;letter-spacing:.4px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;}
   header.banner .ttl input{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:5px 8px;font-family:'IBM Plex Sans';font-size:14px;}
   .wrap{max-width:1140px;margin:0 auto;padding:0 18px;}
   .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:-22px auto 8px;max-width:1140px;padding:0 18px;position:relative;z-index:2;}
@@ -94,13 +100,32 @@ if (typeof XLSX === 'undefined') {
   .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
   .field input{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:14px;}
   .note{font-size:12.5px;color:var(--muted);line-height:1.5;background:#f6f1e4;border-radius:10px;padding:10px 12px;}
-  @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr);}header.banner input.co-in{font-size:23px;}th.hide,td.hide{display:none;}}
-  @media print{.toolbar,.iconbtn,.addrow,.phead .btn,.warnbar{display:none!important;}body{background:#fff;padding:0;}}
+  @media(max-width:760px){
+    .cards{grid-template-columns:repeat(2,1fr);}
+    .brand{gap:12px;}
+    .brand .logoBox{padding:7px 12px;}
+    .brand .logoBox img{height:42px;}
+    .brand .btxt{flex:1 1 100%;min-width:0;text-align:center;}
+    header.banner input.co-in{font-size:22px;text-align:center;}
+    header.banner input.addr-in{text-align:center;}
+    th.hide,td.hide{display:none;}
+  }
+  @media print{
+    .toolbar,.iconbtn,.addrow,.phead .btn,.warnbar{display:none!important;}
+    body{background:#fff;padding:0;}
+    header.banner{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .brand .logoBox img{height:46px;}
+  }
 </style>
 
 <header class="banner">
-  <input class="co-in" id="coName" value="Vishal Technopower" placeholder="Company Name">
-  <input class="addr-in" id="coAddr" value="B-4, Hans Plaza, Ambedkar Road, Ghaziabad - 201001" placeholder="Address">
+  <div class="brand">
+    <div class="logoBox"><img id="coLogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASUAAABICAMAAACHpBN1AAAAYFBMVEX///////v+///6/////v7+/v/+/f7//vr9/f77/f77/Pz78evm9fva4Omw3vai2PWf2PWe2PWj1vPYxs2rxOKwpb5/pdNsg7hdaaU4XKU6SpUuT5wuT5suT5ouSZgmS5zfR1saAAAT20lEQVR42u1cAXeqvBLEEJQEQq8CCZSq//9fvplNQGyt2n7fe+0593HutYhJCMNmMrtZyOqnN/fMlqlMl6bEZsqMW2HwzRSF5UFjCzm4NSb9nJX8vbRGXe2m7bKXfjSmyH5iU83+zxPb/qUbTm/3t+k8uMxmVRiPx+M0drkuyqwdJuw37TDy2LjPs8y2YRzH0Lm+zqp+fD0e8U12R+76WgsU26z1dSa7WlX98MoGhi7/EZjql6dQarrx/ACl4+RtUWi1aYfjOTi5QF7fKTR5tsPB8cBLBBoeCIXXc6i1AqhnAJNpFK/CaZqBybTZ9eMBx9O264/H4FT2M5tx+2dMqfbT8QFKNCWMI13s+tdzsgi51gZ/82oAKkWGHwkKwGoHoFSoXXsGGCYWfYUFbiMSW4IWZszQajue96r4IZSyunkCJWfDY1PqMd7k+lygLZlM0AkELKFE2xqAGoBQu35BqRF0za5docTByl+SMWmFr/ufMiVs7onxlrvhPD1gpZBFbtX5rj+RllS81ga4XVBqx/ElMiJ46XOUaFngMpid+h0o2UcEjvGWPaSl8+gKk13MQAiG1xp3VrY0JXqp2jsogbtDF06A+JfYUlbvH463zB/v09LxzWflzCE5KBuXXgi5dIryIKGUFaTo0BBPW+cceIISa6oVSoQ31OC3eU77eZTMfWPaN3VmHw04UHdRLuKGl+SjEghCLQtKGYzp+AYCT3YXUVKcHNe2tEUxv9T5FSjdVwMYbzp7REtRBcztFSoakynSgFuhlClqp/PYRZwEJd/J1i5zXJwaNSe95tegdF8NOGNBS6fnTQnGpMWYdqoNBw64NUoiEY+nc+jqGaXg4xZmlKIp7QppRfj7F6B0Tw1gfsts4e+z0nnqMrNqT8QOzGDTJ8WzQikjY/c0J0iEmZdk2ywjzmiOVErJ1yQGfgNKxt2b34qsvq+W4Jtkdi34tNoJ89IitHqHEhQipfgbtLgqo6o0Fp7dhZcwYkNo6Bf24zm28BtQ+pzA987ASkBLD1SAMVftCX9jkgoyya9RqhzgxOis+tcp5OVNJUApkbbxODqh/2uUih8R4eoTNcD5TZmHtAQVcH2bi4L83QVOdGuUQEohj2GBqj+P9Ta/gZIuKQOS9/Y6iRi4Rsm6+hcZE0HCFdv7TtxxcGX5rj0xpmFo9DZ7h1ISioVtT5+gBO4GvByE1rTJBNcowUXuaq1+jxqgg0BaeqACTPm+z1SWZwjw5J/O3m4hk1fi6lMwpRGUtFlQMtvCgPQbmTK1qTDvHZTOtpzv9nN8oO2y7a9RAzAlRZa4T0vnG6aUaRrTeNBL5CPxElA6i1TaOfysyOOMCaThhUEaywJJgbfI2vEsMQTsTBElbeEb/lR04KMakPFGtwxO3PQ4FnC9beGLhGRKGpyNOW/sXJ1XjMD1XdcHCEttqzaczwHHs7Tb1LULJ/xRkYBQb/LOYro7owFuvX/FUFU/pQb2Lx/mNyV+PdTNHVMK9gZImO43bZfCQww7BkxYwTd55V3bB2wesydmOjlOhYndILuu559GSWAu/u5dHxuQbRi8Nr9FDewbK4Gg0uIe39w48Z3GG+Mt4rQKXGtb4ru2JsWLihjIhLEYOW5V+hGfYCStk7LQppCDpSVzYRxjU9cR8Z+NDUQ9SVOqffhkGwFT+PS+rn0WfDGm4MXJykGBr5HxeTxxv+zS6StNudCOrCSouD7AeoVU/Vlp+bIGScYbpzhr0T/9sUI3igp4hkiLuKloBmlXBuZ8/LIrf67rLTuX4j/ozu1X481c7LqUtSNu9rJlPVQUYwHZ37Wt1ICI7uv7yXuoVnexgzyA/1D8bShdjGn/x5m7dl1kbpwmmFJm/jaQMlMnZmK8pLgP0jCJCiizv2+zkcDX4+02SHWY/tLxxvlH1MD+z2OQRGf6v9KUlBI1AD2p1D2QrKdjx9DPDVPS9mozkKXrrbi4evxVJvm4L4Uvu1elt/PPSVmlqtfnW+daxGbmm1im6npVUI6Z8l1ns+LypbxH4Ml/+0Bacx+M7Y/06/6RCoB0TK3dFz83zlDY9z26BGzmI2U+a5h/YjWfSkGoAaD0MeemdnWqwrUCcX6HW6YEz7bt1ltj216cVG74Owe/s43ren7VFZy4WLanP9em3S6WFhW6cX36WXBDmVi1yApdLadibE6lmHFs3cmZil3qUl31aUfCL2zRxSOpcy7fzAdiqeIzZoIa2N/YXpKBldAAQkrH7lYbsrALt3R4PY/4HE+hbsNwOs+eagylaXRSnNrgu7rt6NW+wudPXm/clb8xaoLL9MNpDF76XbWxqdBhIgZKscIwvI5yRMLuro9FpD6qh9OZyxFVP5y544g0qg30rU/sqRQ/+XojB+QKpLlPUCrcnxsBuZd9YxYNIOHd420VQJS8qypZBMcf9lMzSBRDby7EgCO6G/vaez90WczQ6VIoKpxGL/GmQfINdLYEnYiv60fm+qDpMeXxcKnF1w5QTMyakrWsAYADq9e4jow232J4qkWb+/k8INYl8iWdiukwKOKkcrpJd9TAe5hiwKdYQnJyhpsoSd9jqkDGbxKX9TEbLmv3huvg6L6L4x593WfWVv15aEqJDTAa14C8cy7ESKhOqDZ0DB2oKkyAS4POqv4k+SzWtq/jS5YLvAe1LVGP121MxvDnwUiA+RU0arTZANG9RBhKgKLA0bg/oTZWOocuGyvVt4YLGOe9+VQN3IyA20iGSQNQBdwcs+Wm7XJrNoLSBn2AxeRx9RFta1Px3m5knY1zzpbJcz6zuaCkyjmP6aC0IrrTKWURFDbaP4wi1AyoFIZW4PNSFYIFcNQSJd/xK1ovOUOwLSZvaFpMztHIMjnOU+g2vGjD9QraUonOlRWYrSi3qFOrwiraXf0ZSuajMb3s6+jLZ/P65SemRKJ1ehsXdyWnBKy/oHQJ78Ie0l0i56htRCm7RgnXEUZcAmVJQmnT0lzi6hVqYvQAMS53HjJTMjYemmjGUe5uDZE0MirfxkbH8TzUWumUQHVB6bIwTZTIeMzfq5+KDayDu0Vm+rfFlO5OoTNK0tWLLVmZKXc9VypnU8RsVOibKGVtcMwipA0klIDv6Ob1E+1oOzTcNUoxpS6VKXfgaBoTjPvNc/ByCWyvyiLacLZCaescqy0obe+j9GGpF6Yk6s92aclpGtznCqdco6TLIqJUU6ftetpkNfC+LjrJ1jqhlNZ4Vyg1jgyO4ZFQascJFjBbPSm/0REljDgVp4xwlmWXiNK2fzvt41CdxhqywA3HydfbHLBx7Sai5KgiyRULShCuWT+efH7HT/kQ3KVuMUWXAuDTuVPqa7YU569WZpN4qer9wlRw81rKCiVJHHxRRUQJhDb5NUqcsASll8wk9r7KNGQeZ7zUXX/E8FQQBZLPyAEHTkso5XHO69SCEq6Pc11zx08prpedYEoGo2XWABSU9oFo/YDSIEklQ0Tp9WIQceIUlMY5UDycLihtdeTQiBLXen1+QamnZhCUYEMQQISQJ7ugBBVyCiYtVQEuTGxc9oP4DXtZBiRKMetlYE7wjJKmtArNXaf3OotQWIkgnR9Q9x2Ugu/ZkZsoJVua85j6sEIJzEJrqPP7KE2BqyxQpfoWSnmaMnB2FxqZGmFTtZpRGti5PgyHxZbwDVjWd8NHGHMv+w8pFWEGaQr2yyj5uJ7rLyh9HHGJKTdXI24LjUiX8YJSfYVSGnGd6xw9FHOd24v5b7alTfs2HjYAh5MHVLiPCWWJvUVUXnipI3M3j0KM62UnOiemqBeQYErl11GyXCQie3O9FppnFZtJI25ooi9+zUt6S100HnZESa8pLbL3i068FNXBVkZQo5Y57kLB1B8W4LD4ngNOFtnVrCqBL5W7oITutTFB/UGgqVnFwI0uLxkV0+Rt9nWUxL3YVtSiMsddxe8+VQI0ilLcimZWAmFRApkogd08x5VlGVML6Nekm1Da/nhuVJoVzqMb9qQk8HeIq+grVVlUksUYeamU3P68eLRSsMqpULa8rO9OD1npU5TkBlQ5u9stUQnMufldlJgaN5yCPINSraUWRTY0z6wqF/F/UZXaxicQ4oZiYai3MokyWV9doSR9qeyslwyH80EXzxkT/VymCiwgnbvi+ygVcFny6GBu48WW2nUPUNIybkbxUNpFtvNobOYKJS2X5+Kpbc6cjtlgK3CNB2XzSRm0FhX8CiVU7dyMUsk0Gaix4v4yY73IgHKVFD+dH1K3BOqikJSer7xdOlZAiZMS/vAIcwGavDRJVS4omRIGDJTMNgat+mNM96L9/Ek1xV8rtbHi087dKpWTPGqUsYTgIgzFjSZlc1pr4pr07uLtojhmFzjP5CXU3gg16XsrybM790I/d5XI/Mx4ixGKVdjhYks4cy0PobwmMaIdZpatkMb8oAAv5pBEaDPzOwhJUFJLevOOZpIXKqat7j8YchSK0yr4gflOHF2ezM8PvGTLHEfW4zl2YksxcjH5+kEoNakBaowlf2l6e8KU4OIyxDV2Dd2hDQM/5yFqIf8axQvkyjhAQ0GnUJVYx/BY6FzOJJ64ax0vtpsjNu38bBzQGTwTdIZAv0tXLCcVZnWDU1I7UXkN3foqk5JUgHEfTUlXLcMzUan1A0aYJBHxvAwXxIYfqgGYUl6Ht4WUnlABglIvCdwEAJ57/CIhXe+bqGQ2lRzuCQzDj36uMO82dazn8ln4ODO7x/iFEVhmIDJ98HKyRECQxamIU2thuGsj5kw5jC6WduvOUZW62Bz7td1IX7qHBP7yp7arZO/pzT/BSphaajq3tcys+GLlCzdrzZy2o3mMYTcm6NSpjFntsp6UiN2Zc1t0bL+2MbdnXXe9piBF1LvI9XYWm0uW2NzT2DuusqTmWFfWXOr6kRqAKdX+7TitTOnfyh0qPl8k+Reqzsv3/zA9RT1TBMZ09SjqdOyevZBilV9zlVXzrsyHzJ3V7rvy75pXH7N+PpR5vqcfzv+xj58GB9w1SMtk8P9thZI23SqlcprG7v+g3FhOuUrP/Y2mpK15knkKax4tNn9zpZoRwvPalIrneh6X2f8hAFzBL9eJBdfXbNd5AF+4JOnY1t5BV391YX+d6z0dn1IBn9+rO5dUmm/ORVX/WaisuDYNavw73d/GJcvyyYntZqLSogKKZ6qkzO1OXT8rsrmL4QdMNz31cz+E5kavRVzzHC6EJl+f57MZSbfBN2BaN4SDhnwP/gpdxsPj8zCM+jVfhMlk3XCaIiv1zxmigqc7wDnoGPFhvnbMW+WLBUxZiEXFF5YU+CzkEHCt8eVSOj4jNx7qFnKY7mbBQwXsMTagbRuYSbBnYDbfxuZKacsy4bkUTzlxjbx5JVod3x/CZ/Z4QhuTqWPlreWjDuxXfLj/y8zkp4W6n4QJty1fbohegkEuv1KDxdo03PKs92qReGgYZGWLH04MdLytWhTwNtZJjk8/hwAql2KaSbNXPvqBDjYDc9nPEaXELFyek9/5rJD7MofGgMAXVADsOTRtV8NDgk/miir6RfDIWr7gpCvg1ntfoxictXio985xx9cqluZCNP3bnsk0vjO69fWu7VADpXnVFc7RN1UO/5XJNL4x9MgaZlrQ9+vgxnWWjTU5PwG283Lb4OANniteqqKdFpZtcn25H7qd+N7yRPZXuSmqgen8bFXJ+Bhh7uhcwLCAcXf96NFt+O4djsDMAjq4w/HgYRJkn9CAYFD8ALt38lgKl3sDs1eG0A97kgZuNhlPXpOCITONuOW4IQ4253vm/3icAteKHRTCGfL4g7TgbevnJYB+rFsYe0AvDtIXtDvg5Gii5/P54Rsv5ikU1MB0fNqUlMb5cQ/1DqdEP9BV3Y8cGrVwibewaFrbgH97RkEcWaLqxx5g9UOzC3yQLr00h6hVfFpnrF04oMng+EgrzGeMlhfyNuxZQjCUlgBuh3M11eBrAhdqN+x3/YwSb1a/3wmwOB+/tsOBtAnIYXRVcN9wLqEGhiNVwHNiibNFV8GWeYGxrwAKfT/wpjteUoAZyacnlzKxyyvMOi5ZRJDYfsG7XaP/Kl5tjQviQ89zjGnvOubzeCCHhvBrA52Ga2VLjdJ8tcXIQ+gC5jfciYMEKBxTvTDdxV5gxpO+iAURc2eZnvONBzmZbPp8LEALZWyr1hEsXNymp7mA0V26fQCmc3yxED5rPqCLi8CtHTik+Ham+KKBjLkRgCA4LXf6wDcRzZE4Lrw2AABCAAwUJBUw1BsmqRCSgyIX8ZCqdmKntDBpFgSU79pXNhV7IZ+00rFpHZrLd32T6++I4MyNvngaU/aJsdiWBhTElJlG4UPrD5zAORW3tC8tFs4YLfqKuYkDkoRl5QUC6G5oNv3oaEptYJagb5fQax9gsxizGNuEAPUH3pa+Z0s1OY1sCOAPwLkfOfYpl7Idp16MTkwNUBFeboQX5gQzefa1YnDve6Gg7umhupP3mY2gVvQWxOn4nVZOQoU5DXu+2kx4CJ8OI0jxxVWEi6OvHUaOQaUxYNFKU0lt/DR2YXSJW5Zz0CIsq3SGEeLO9q8kqJzPQpP2eAifgVVHZtDxiyODywvWpFv8DCN4u2OPGmB/+B5KWfa8Z7OrUk7vroK9OxINpjCg4kxVW+2cgZJx8uAuOMDiPyPXuYW6qZyV0oM8X7+TVtROpBR+xr9tFRdbN/M50JRlwZo5uShMkbTDX6af1my3zvEzqrq8kngwK5oM7WDQSi/kEy2gc1U9N/G/9tgL8g0FW/0Upcl7BKrgc/3Db6H4327iZwyjr58c2Rw3wzdE3X93+w9fnGCQdr48kAAAAABJRU5ErkJggg==" alt="Vishal Technopower"></div>
+    <div class="btxt">
+      <input class="co-in" id="coName" value="Vishal Technopower" placeholder="Company Name">
+      <input class="addr-in" id="coAddr" value="B-4, Hans Plaza, Ambedkar Road, Ghaziabad - 201001" placeholder="Address">
+    </div>
+  </div>
   <div class="ttl"><span>Day Book Expense Tracking Sheet &mdash; From</span>
     <input type="date" id="fromDate"><span>To</span><input type="date" id="toDate"></div>
 </header>
@@ -342,7 +367,8 @@ function currentBook(){syncHeader();return {companyName:state.company,address:st
   requirements:state.requirements};}
 function openPreview(){
   if(typeof XLSX==='undefined'){alert('Excel library load ho rahi hai, ek pal ruk kar try karein.');return;}
-  const ws=buildWorkbook(currentBook()).Sheets[Object.keys(buildWorkbook(currentBook()).Sheets)[0]];
+  const wb=buildWorkbook(currentBook());
+  const ws=wb.Sheets[wb.SheetNames[0]];
   $('previewBox').innerHTML=XLSX.utils.sheet_to_html(ws);
   $('previewModal').classList.add('open');
 }
