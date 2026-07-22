@@ -20,20 +20,20 @@ if (typeof XLSX === 'undefined') {
     color:var(--ink);font-family:'IBM Plex Sans',sans-serif;padding-bottom:128px;}
   .num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
   h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:600;}
-  header.banner{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#f4efe2;padding:20px 24px 24px;text-align:center;position:relative;box-shadow:var(--shadow);border-bottom:3px solid #c9a84a;}
-  /* --- brand row: logo + company text --- */
-  .brand{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;max-width:900px;margin:0 auto;}
-  .brand .logoBox{background:#fff;border-radius:12px;padding:8px 14px;box-shadow:0 3px 10px rgba(0,0,0,.18);flex:0 0 auto;line-height:0;}
-  .brand .logoBox img{height:54px;width:auto;display:block;}
-  .brand .btxt{flex:1 1 260px;min-width:230px;max-width:520px;text-align:left;}
-  header.banner input.co-in,header.banner input.addr-in{background:transparent;border:none;color:#fff;text-align:left;width:100%;font-family:inherit;padding:0;}
-  header.banner input.co-in{font-family:'Fraunces',serif;font-size:28px;font-weight:600;letter-spacing:.3px;}
-  header.banner input.addr-in{font-size:13.5px;color:#dfeee6;margin-top:5px;letter-spacing:.3px;}
-  header.banner input.co-in:focus,header.banner input.addr-in:focus{outline:none;background:rgba(255,255,255,.10);border-radius:6px;}
-  header.banner .ttl{margin-top:16px;font-size:15px;font-weight:600;letter-spacing:.4px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;}
-  header.banner .ttl input{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:5px 8px;font-family:'IBM Plex Sans';font-size:14px;}
+  /* --- white letterhead banner --- */
+  header.banner{background:#ffffff;color:var(--ink);padding:26px 24px 22px;text-align:center;position:relative;box-shadow:var(--shadow);border-bottom:3px solid #c9a84a;}
+  .brand{max-width:900px;margin:0 auto;}
+  .brand .logoBox{line-height:0;}
+  .brand .logoBox img{height:92px;width:auto;max-width:92%;display:inline-block;}
+  .brand .btxt{margin-top:10px;}
+  header.banner input.co-in,header.banner input.addr-in{background:transparent;border:none;text-align:center;width:100%;font-family:inherit;padding:2px 0;}
+  header.banner input.co-in{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--accent-d);letter-spacing:.4px;}
+  header.banner input.addr-in{font-size:13px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
+  header.banner input.co-in:focus,header.banner input.addr-in:focus{outline:none;background:#f6f1e4;border-radius:6px;}
+  header.banner .ttl{margin-top:14px;font-size:14.5px;font-weight:600;letter-spacing:.3px;color:var(--accent-d);display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  header.banner .ttl input{background:#fbf7ee;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:5px 8px;font-family:'IBM Plex Sans';font-size:14px;}
   .wrap{max-width:1140px;margin:0 auto;padding:0 18px;}
-  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:-22px auto 8px;max-width:1140px;padding:0 18px;position:relative;z-index:2;}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px auto 8px;max-width:1140px;padding:0 18px;position:relative;z-index:2;}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);}
   .card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:600;}
   .card .val{font-size:26px;font-weight:600;margin-top:6px;}
@@ -102,19 +102,19 @@ if (typeof XLSX === 'undefined') {
   .note{font-size:12.5px;color:var(--muted);line-height:1.5;background:#f6f1e4;border-radius:10px;padding:10px 12px;}
   @media(max-width:760px){
     .cards{grid-template-columns:repeat(2,1fr);}
-    .brand{gap:12px;}
-    .brand .logoBox{padding:7px 12px;}
-    .brand .logoBox img{height:42px;}
-    .brand .btxt{flex:1 1 100%;min-width:0;text-align:center;}
-    header.banner input.co-in{font-size:22px;text-align:center;}
-    header.banner input.addr-in{text-align:center;}
+    .brand .logoBox img{height:58px;}
+    header.banner{padding:18px 14px 16px;}
+    header.banner input.co-in{font-size:16px;}
+    header.banner input.addr-in{font-size:12px;}
+    header.banner .ttl{font-size:13px;}
     th.hide,td.hide{display:none;}
   }
   @media print{
     .toolbar,.iconbtn,.addrow,.phead .btn,.warnbar{display:none!important;}
     body{background:#fff;padding:0;}
-    header.banner{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-    .brand .logoBox img{height:46px;}
+    header.banner{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:none;}
+    .brand .logoBox img{height:70px;}
+    .cards{margin-top:10px;}
   }
 </style>
 
