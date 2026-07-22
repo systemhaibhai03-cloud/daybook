@@ -333,9 +333,7 @@ function render(){
       rows+=`<tr>
         <td style="min-width:104px"><select class="cell" onchange="state.days[${di}].entries[${ei}].method=this.value;save()">
           ${METHODS.map(m=>`<option ${m===e.method?'selected':''}>${m}</option>`).join('')}</select></td>
-        <td style="min-width:165px"><select class="cell" onchange="state.days[${di}].entries[${ei}].category=this.value;recalc();save()">
-          <option value="">— Category —</option>
-          ${CATEGORIES.map(c=>`<option ${c===e.category?'selected':''}>${c}</option>`).join('')}</select></td>
+        <td style="min-width:165px">${catCell(di,ei,e)}</td>
         <td style="min-width:120px"><input class="cell" value="${esc(e.to)}" placeholder="Paid To" oninput="state.days[${di}].entries[${ei}].to=this.value;save()"></td>
         <td style="min-width:200px"><textarea class="cell" placeholder="Description" oninput="state.days[${di}].entries[${ei}].description=this.value;save()">${esc(e.description)}</textarea></td>
         <td style="min-width:96px"><input class="cell amt num" value="${esc(e.amount)}" inputmode="decimal" placeholder="0" oninput="state.days[${di}].entries[${ei}].amount=this.value;recalc();save()"></td>
@@ -362,6 +360,34 @@ function render(){
     qb.appendChild(tr);
   });
   recalc();
+}
+
+/* ---- category: list + manual/custom ---- */
+function catCell(di,ei,e){
+  if(e._catEdit){
+    return `<div style="display:flex;gap:5px;align-items:center">
+      <input class="cell" id="catin${di}_${ei}" value="${esc(e.category)}" placeholder="Category likhiye…"
+        oninput="state.days[${di}].entries[${ei}].category=this.value;recalc();save()"
+        onkeydown="if(event.key==='Enter'){delete state.days[${di}].entries[${ei}]._catEdit;render();save();}">
+      <button class="iconbtn" title="Wapas list se chunein" onclick="delete state.days[${di}].entries[${ei}]._catEdit;render();save()">▾</button></div>`;
+  }
+  const custom=e.category&&!CATEGORIES.includes(e.category);
+  return `<select class="cell" onchange="catPick(${di},${ei},this.value)">
+    <option value="">— Category —</option>
+    ${custom?`<option selected value="${esc(e.category)}">${esc(e.category)}</option>`:''}
+    ${CATEGORIES.map(c=>`<option ${c===e.category?'selected':''}>${c}</option>`).join('')}
+    <option value="__custom__">✎ Custom category likhein…</option></select>`;
+}
+function catPick(di,ei,v){
+  const e=state.days[di].entries[ei];
+  if(v==='__custom__'){
+    e._catEdit=true;
+    if(CATEGORIES.includes(e.category))e.category='';
+    render();
+    const inp=$('catin'+di+'_'+ei); if(inp){inp.focus();}
+    return;
+  }
+  e.category=v;recalc();save();
 }
 
 function addReceiving(){state.receiving.push({label:'',amount:''});render();save();}
