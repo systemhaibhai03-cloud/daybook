@@ -230,6 +230,13 @@ if (typeof XLSX === 'undefined') {
     <div class="pbody"><table><thead><tr><th>Requirement</th><th style="width:150px">Amount (₹)</th><th class="act"></th></tr></thead>
       <tbody id="reqBody"></tbody></table></div>
   </section>
+
+  <section class="panel">
+    <div class="phead"><div class="htxt"><span class="eyebrow">Optional</span><h2>Toiletry</h2></div>
+      <button class="btn ghost" onclick="addToi()">+ Add line</button></div>
+    <div class="pbody"><table><thead><tr><th>Item / Saman</th><th style="width:150px">Amount (₹)</th><th class="act"></th></tr></thead>
+      <tbody id="toiBody"></tbody></table></div>
+  </section>
   <div class="saveflag" id="saveFlag"></div>
 </div>
 
@@ -304,6 +311,7 @@ function blankState(){
     receiving:[{label:'Opening balance',amount:''}],
     days:[{date:t,entries:[blankEntry()]}],
     requirements:[],
+    toiletry:[],
     emailConfig:Object.assign({},DEFAULT_EMAILS)};
 }
 function ddmmyyyy(iso){if(!iso)return '';const [y,m,d]=iso.split('-');return `${d}.${m}.${y}`;}
@@ -359,6 +367,15 @@ function render(){
       <td class="act"><button class="iconbtn" onclick="state.requirements.splice(${i},1);render();save()">✕</button></td>`;
     qb.appendChild(tr);
   });
+
+  const tb=$('toiBody'); tb.innerHTML='';
+  (state.toiletry||[]).forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="cell" value="${esc(it.label)}" oninput="state.toiletry[${i}].label=this.value;save()"></td>
+      <td><input class="cell amt num" value="${esc(it.amount)}" inputmode="decimal" oninput="state.toiletry[${i}].amount=this.value;save()"></td>
+      <td class="act"><button class="iconbtn" onclick="state.toiletry.splice(${i},1);render();save()">✕</button></td>`;
+    tb.appendChild(tr);
+  });
   recalc();
 }
 
@@ -392,6 +409,7 @@ function catPick(di,ei,v){
 
 function addReceiving(){state.receiving.push({label:'',amount:''});render();save();}
 function addReq(){state.requirements.push({label:'',amount:''});render();save();}
+function addToi(){if(!state.toiletry)state.toiletry=[];state.toiletry.push({label:'',amount:''});render();save();}
 function addDay(){const last=state.days[state.days.length-1];const d=last?last.date:new Date().toISOString().slice(0,10);
   state.days.push({date:d,entries:[blankEntry()]});render();save();}
 function addEntry(di){state.days[di].entries.push(blankEntry());render();save();}
@@ -439,14 +457,14 @@ function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);
 function backupJSON(){syncHeader();const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`daybook_backup_${state.fromDate||'data'}.json`;a.click();}
 function restoreJSON(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{state=JSON.parse(r.result);if(!state.emailConfig)state.emailConfig={e1:'',e2:'',e3:'',endpoint:''};render();save();flag('Restored ✓');}catch(e){alert('Backup file padhi nahi ja saki.');}};
+  r.onload=()=>{try{state=JSON.parse(r.result);if(!state.emailConfig)state.emailConfig={e1:'',e2:'',e3:'',endpoint:''};if(!state.toiletry)state.toiletry=[];render();save();flag('Restored ✓');}catch(e){alert('Backup file padhi nahi ja saki.');}};
   r.readAsText(f);ev.target.value='';}
 function newBookCarry(){syncHeader();const t=totals();
   if(!confirm(`Nayi book shuru karein?\nClosing balance ₹${fmt(t.closing)} nayi book ka Opening balance ban jayega.`))return;
   const today=new Date().toISOString().slice(0,10);
   state={company:state.company,address:state.address,fromDate:today,toDate:today,
     receiving:[{label:`Opening balance on dtd:${ddmmyyyy(today)}`,amount:t.closing}],
-    days:[{date:today,entries:[blankEntry()]}],requirements:[],emailConfig:state.emailConfig};
+    days:[{date:today,entries:[blankEntry()]}],requirements:[],toiletry:[],emailConfig:state.emailConfig};
   render();save();flag('New book started');}
 function clearAllConfirm(){if(confirm('Sab clear karke blank day book shuru karein?')){const ec=state.emailConfig;state=blankState();state.emailConfig=ec;render();save();}}
 
@@ -459,7 +477,7 @@ function currentBook(){syncHeader();return {companyName:state.company,address:st
   fromDate:ddmmyyyy(state.fromDate),toDate:ddmmyyyy(state.toDate),
   receiving:state.receiving.map(r=>({label:r.label,amount:r.amount})),
   days:state.days.map(d=>({date:ddmmyyyy(d.date),entries:d.entries})),
-  requirements:state.requirements};}
+  requirements:state.requirements,toiletry:state.toiletry||[]};}
 function openPreview(){
   if(typeof XLSX==='undefined'){alert('Excel library load ho rahi hai, ek pal ruk kar try karein.');return;}
   const wb=buildWorkbook(currentBook());
@@ -548,6 +566,12 @@ function buildWorkbook(book){
   const qs=(book.requirements||[]).filter(q=>q.label||q.amount);
   if(qs.length){push(['','','','','','','']);const qh=push(['Requirements:','','','','','','']);merges.push({s:{r:qh,c:0},e:{r:qh,c:3}});S(qh,0,{font:{name:FONT,sz:12,bold:true}});
     qs.forEach(q=>{const rr=push([q.label||'','','','',n(q.amount),'','']);merges.push({s:{r:rr,c:0},e:{r:rr,c:3}});S(rr,0,{font:{name:FONT,sz:11}});S(rr,4,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},numFmt:'#,##0'});});}
+  const ts=(book.toiletry||[]).filter(q=>q.label||q.amount);
+  if(ts.length){push(['','','','','','','']);const th=push(['Toiletry:','','','','','','']);merges.push({s:{r:th,c:0},e:{r:th,c:3}});S(th,0,{font:{name:FONT,sz:12,bold:true}});
+    const tStart=r+1;
+    ts.forEach(q=>{const rr=push([q.label||'','','','',n(q.amount),'','']);merges.push({s:{r:rr,c:0},e:{r:rr,c:3}});S(rr,0,{font:{name:FONT,sz:11}});S(rr,4,{font:{name:FONT,sz:11},alignment:{horizontal:'center'},numFmt:'#,##0'});});
+    const tt=push(['Toiletry Total','','','',{f:`SUM(E${tStart}:E${r})`},'','']);merges.push({s:{r:tt,c:0},e:{r:tt,c:3}});
+    S(tt,0,{font:{name:FONT,sz:11,bold:true}});S(tt,4,{font:{name:FONT,sz:11,bold:true},alignment:{horizontal:'center'},fill:{fgColor:{rgb:'FFFFF2A8'}},numFmt:'#,##0'});}
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!merges']=merges;
   ws['!cols']=[{wch:13},{wch:16},{wch:17},{wch:34},{wch:13},{wch:16},{wch:22}];ws['!rows']=[];ws['!rows'][hR]={hpt:34};
   Object.keys(styleMap).forEach(k=>{const [rr,cc]=k.split(',').map(Number);const ad=XLSX.utils.encode_cell({r:rr,c:cc});if(!ws[ad])ws[ad]={t:'s',v:''};ws[ad].s=styleMap[k];});
@@ -559,6 +583,7 @@ if(!state.emailConfig)state.emailConfig=Object.assign({},DEFAULT_EMAILS);
 if(!state.emailConfig.e1&&!state.emailConfig.e2&&!state.emailConfig.e3)state.emailConfig=Object.assign({endpoint:state.emailConfig.endpoint||''},DEFAULT_EMAILS);
 if(!state.emailConfig.endpoint&&DEFAULT_EMAILS.endpoint)state.emailConfig.endpoint=DEFAULT_EMAILS.endpoint;
 if(state.company==='Vishal Electricals')state.company='Vishal Technopower';
+if(!state.toiletry)state.toiletry=[];
 state.days.forEach(d=>d.entries.forEach(e=>{if(e.category===undefined)e.category='';}));
 render();
 </script>
