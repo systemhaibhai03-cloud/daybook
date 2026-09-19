@@ -273,9 +273,10 @@ if (typeof XLSX === 'undefined') {
       <div class="field"><label>Email 1</label><input id="em1" placeholder="name1@yahoo.com"></div>
       <div class="field"><label>Email 2</label><input id="em2" placeholder="name2@yahoo.com"></div>
       <div class="field"><label>Email 3</label><input id="em3" placeholder="name3@yahoo.com"></div>
+      <div class="field"><label>Email 4</label><input id="em4" placeholder="name4@gmail.com"></div>
       <div class="field"><label>Auto-send URL (Google Apps Script) — optional</label><input id="emEndpoint" placeholder="https://script.google.com/macros/s/..../exec"></div>
-      <div class="note"><b>URL daala hai?</b> → Excel apne aap attach hokar 3 emails par chali jayegi.<br>
-      <b>Khali chhoda?</b> → Mail app khulega 3 IDs + ready message ke saath, aur Excel download ho jayegi — aap attach kar dijiye.</div>
+      <div class="note"><b>URL daala hai?</b> → Excel apne aap attach hokar chaaro emails par chali jayegi.<br>
+      <b>Khali chhoda?</b> → Mail app khulega saari IDs + ready message ke saath, aur Excel download ho jayegi — aap attach kar dijiye.</div>
     </div>
     <div class="mf"><button class="btn line" onclick="closeModal('emailModal')">Cancel</button>
       <button class="btn solid" onclick="saveEmailSetup()">Save</button></div>
@@ -288,7 +289,7 @@ if (typeof XLSX === 'undefined') {
     <div class="mb" style="padding:32px 26px 8px;text-align:center">
       <div style="font-size:48px;line-height:1">✅</div>
       <h2 style="margin:12px 0 8px">Thank you!</h2>
-      <p style="color:var(--muted);font-size:14.5px;line-height:1.55;margin:0">Day Book ki Excel teeno email IDs par bhej di gayi hai.<br>Pehli baar inbox / spam folder check kar lein.</p>
+      <p style="color:var(--muted);font-size:14.5px;line-height:1.55;margin:0">Day Book ki Excel chaaro email IDs par bhej di gayi hai.<br>Pehli baar inbox / spam folder check kar lein.</p>
     </div>
     <div class="mf" style="justify-content:center"><button class="btn solid" onclick="closeModal('doneModal')">OK</button></div>
   </div>
@@ -301,7 +302,7 @@ const METHODS=['Cash','Online','UPI','Other'];
 const CATEGORIES=['Petrol Expense','Print and Stationary','Tea and Milk','Staff Welfare',
   'Vehicle Repair and Maintenance','Housekeeping','Birthday Celebration','Anniversary Celebration',
   'Donation','Miscellaneous'];
-const DEFAULT_EMAILS={e1:'accounts.vishalelectricals@yahoo.com',e2:'accounts2.ve@yahoo.com',e3:'operations3.ve@yahoo.com',endpoint:'https://script.google.com/macros/s/AKfycbzBo9EC8j-ogOvzh14rI5ROoJrtBwyCSc_Fi8ICotA5SMMmH0z6aUmd01OMBUcg0zzJ/exec'};
+const DEFAULT_EMAILS={e1:'accounts.vishalelectricals@yahoo.com',e2:'accounts2.ve@yahoo.com',e3:'operations3.ve@yahoo.com',e4:'executiveacoounts@gmail.com',endpoint:'https://script.google.com/macros/s/AKfycbzBo9EC8j-ogOvzh14rI5ROoJrtBwyCSc_Fi8ICotA5SMMmH0z6aUmd01OMBUcg0zzJ/exec'};
 let state=null;
 
 function blankEntry(){return {method:'Cash',category:'',to:'',description:'',amount:'',remarks:''};}
@@ -458,7 +459,7 @@ document.addEventListener('input',e=>{if(['coName','coAddr','fromDate','toDate']
 function backupJSON(){syncHeader();const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`daybook_backup_${state.fromDate||'data'}.json`;a.click();}
 function restoreJSON(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{state=JSON.parse(r.result);if(!state.emailConfig)state.emailConfig={e1:'',e2:'',e3:'',endpoint:''};if(!state.toiletry)state.toiletry=[];render();save();flag('Restored ✓');}catch(e){alert('Backup file padhi nahi ja saki.');}};
+  r.onload=()=>{try{state=JSON.parse(r.result);if(!state.emailConfig)state.emailConfig={e1:'',e2:'',e3:'',e4:'',endpoint:''};if(!state.emailConfig.e4)state.emailConfig.e4=DEFAULT_EMAILS.e4;if(!state.toiletry)state.toiletry=[];render();save();flag('Restored ✓');}catch(e){alert('Backup file padhi nahi ja saki.');}};
   r.readAsText(f);ev.target.value='';}
 function newBookCarry(){syncHeader();const t=totals();
   if(!confirm(`Nayi book shuru karein?\nClosing balance ₹${fmt(t.closing)} nayi book ka Opening balance ban jayega.`))return;
@@ -470,8 +471,8 @@ function newBookCarry(){syncHeader();const t=totals();
 function clearAllConfirm(){if(confirm('Sab clear karke blank day book shuru karein?')){const ec=state.emailConfig;state=blankState();state.emailConfig=ec;render();save();}}
 
 function closeModal(id){$(id).classList.remove('open');}
-function openEmailSetup(){const c=state.emailConfig||{};$('em1').value=c.e1||'';$('em2').value=c.e2||'';$('em3').value=c.e3||'';$('emEndpoint').value=c.endpoint||'';$('emailModal').classList.add('open');}
-function saveEmailSetup(){state.emailConfig={e1:$('em1').value.trim(),e2:$('em2').value.trim(),e3:$('em3').value.trim(),endpoint:$('emEndpoint').value.trim()};save();closeModal('emailModal');flag('Email setup saved ✓');}
+function openEmailSetup(){const c=state.emailConfig||{};$('em1').value=c.e1||'';$('em2').value=c.e2||'';$('em3').value=c.e3||'';$('em4').value=c.e4||'';$('emEndpoint').value=c.endpoint||'';$('emailModal').classList.add('open');}
+function saveEmailSetup(){state.emailConfig={e1:$('em1').value.trim(),e2:$('em2').value.trim(),e3:$('em3').value.trim(),e4:$('em4').value.trim(),endpoint:$('emEndpoint').value.trim()};save();closeModal('emailModal');flag('Email setup saved ✓');}
 
 /* ---- preview ---- */
 function currentBook(){syncHeader();return {companyName:state.company,address:state.address,
@@ -506,8 +507,8 @@ let __lastSendTime=0;
 function sendEmail(){
   if(__sending){flag('Mail bheji ja rahi hai… ruk jaiye');return;}
   if(typeof XLSX==='undefined'){alert('Excel library load ho rahi hai.');return;}
-  const c=state.emailConfig||{}; const to=[c.e1,c.e2,c.e3].filter(Boolean);
-  if(!to.length){alert('Pehle "Email setup" me 3 email IDs daaliye.');openEmailSetup();return;}
+  const c=state.emailConfig||{}; const to=[c.e1,c.e2,c.e3,c.e4].filter(Boolean);
+  if(!to.length){alert('Pehle "Email setup" me email IDs daaliye.');openEmailSetup();return;}
   const {book,subject,body,filename}=emailMeta();
 
   // same sheet 30 second ke andar dobara na jaye
@@ -606,7 +607,8 @@ function buildWorkbook(book){
 
 state=load()||blankState();
 if(!state.emailConfig)state.emailConfig=Object.assign({},DEFAULT_EMAILS);
-if(!state.emailConfig.e1&&!state.emailConfig.e2&&!state.emailConfig.e3)state.emailConfig=Object.assign({endpoint:state.emailConfig.endpoint||''},DEFAULT_EMAILS);
+if(!state.emailConfig.e1&&!state.emailConfig.e2&&!state.emailConfig.e3&&!state.emailConfig.e4)state.emailConfig=Object.assign({endpoint:state.emailConfig.endpoint||''},DEFAULT_EMAILS);
+if(!state.emailConfig.e4&&DEFAULT_EMAILS.e4)state.emailConfig.e4=DEFAULT_EMAILS.e4;
 if(!state.emailConfig.endpoint&&DEFAULT_EMAILS.endpoint)state.emailConfig.endpoint=DEFAULT_EMAILS.endpoint;
 if(state.company==='Vishal Electricals')state.company='Vishal Technopower';
 if(!state.toiletry)state.toiletry=[];
